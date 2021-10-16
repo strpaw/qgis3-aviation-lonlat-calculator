@@ -156,7 +156,7 @@
     <string>Input data:</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBoxInputData">
+  <widget class="QComboBox" name="comboBoxInputDataMode">
    <property name="geometry">
     <rect>
      <x>10</x>

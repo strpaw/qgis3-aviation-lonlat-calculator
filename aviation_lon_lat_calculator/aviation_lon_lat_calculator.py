@@ -179,6 +179,12 @@ class AviationLonLatCalculator:
                 action)
             self.iface.removeToolBarIcon(action)
 
+    def switch_input_data_mode(self):
+        """ Switch input data mode:
+        single point calculation: azimuth, distance
+        single point calculation: azimuth, distance, offset and so on.
+        """
+        self.dlg.stackedWidgetInputData.setCurrentIndex(self.dlg.comboBoxInputDataMode.currentIndex())
 
     def run(self):
         """Run method that performs all the real work"""
@@ -188,6 +194,8 @@ class AviationLonLatCalculator:
         if self.first_start == True:
             self.first_start = False
             self.dlg = AviationLonLatCalculatorDialog()
+            self.dlg.comboBoxInputDataMode.currentIndexChanged.connect(self.switch_input_data_mode)
+            self.dlg.pushButtonCancel.clicked.connect(self.dlg.close)
 
         # show the dialog
         self.dlg.show()
