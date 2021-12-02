@@ -1,4 +1,4 @@
-from aviation_gis_tools.angle import *
+from .angle import *
 
 
 BEARING_COMPACTED = {
@@ -21,6 +21,9 @@ class Bearing(Angle):
         self.brng_dd = None
         self.err_msg = ""
         self.validate_brng()
+
+    def __str__(self):
+        return self.brng_src
 
     @staticmethod
     def is_within_range(brng_dd):

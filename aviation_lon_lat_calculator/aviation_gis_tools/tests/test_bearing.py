@@ -1,5 +1,5 @@
 import unittest
-from aviation_gis_tools.bearing import *
+from ..bearing import *
 
 
 class BearingTests(unittest.TestCase):

@@ -1,5 +1,5 @@
 import re
-from aviation_gis_tools.angle import *
+from .angle import *
 
 COORDINATE_COMPACTED = {
     AT_LONGITUDE: {
@@ -55,6 +55,9 @@ class Coordinate(Angle):
         self.ang_dd = None
         self.err_msg = ""
         self.validate_coordinate()
+
+    def __str__(self):
+        return self.ang_src
 
     @staticmethod
     def is_coordinate_within_range(coord_dd, ang_type):

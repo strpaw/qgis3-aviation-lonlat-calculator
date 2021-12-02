@@ -1,5 +1,5 @@
 import unittest
-from aviation_gis_tools.speeds import *
+from ..speeds import *
 
 
 class SpeedTests(unittest.TestCase):
