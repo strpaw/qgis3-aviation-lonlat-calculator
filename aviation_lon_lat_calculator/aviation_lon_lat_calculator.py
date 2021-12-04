@@ -21,15 +21,17 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
+from qgis.core import *
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
 from .aviation_lon_lat_calculator_dialog import AviationLonLatCalculatorDialog
 import os.path
+from datetime import datetime
 
 
 class AviationLonLatCalculator:
@@ -43,6 +45,8 @@ class AviationLonLatCalculator:
             application at run time.
         :type iface: QgsInterface
         """
+        self._output_layer = None
+        self._output_layer_name = None
         # Save reference to the QGIS interface
         self.iface = iface
         # initialize plugin directory
@@ -179,6 +183,33 @@ class AviationLonLatCalculator:
                 action)
             self.iface.removeToolBarIcon(action)
 
+    def _set_output_layer_name(self):
+        """ Note: layer name is generated from timestamp. """
+        timestamp = datetime.now()
+        self._output_layer_name = "CalPoints_{}".format(timestamp.strftime("%Y_%m_%d_%H%M%f"))
+
+    def create_output_layer(self):
+        """ Create point layer to store calculated points.
+        return: QgsVectorLayer
+        """
+        self._set_output_layer_name()
+        layer = QgsVectorLayer('Point?crs=epsg:4326', self._output_layer_name, 'memory')
+        provider = layer.dataProvider()
+        layer.startEditing()
+        provider.addAttributes([
+            QgsField("CALC_POINT", QVariant.String, len=100),
+            QgsField("CALC_LON", QVariant.String, len=100),
+            QgsField("CALC_LAT", QVariant.String, len=100),
+            QgsField("INPUT_DATA", QVariant.String, len=100),
+        ])
+        layer.commitChanges()
+        QgsProject.instance().addMapLayer(layer)
+        return layer
+
+    def is_output_layer_removed(self):
+        """ Check if output layer has been removed from layers. """
+        return not bool(QgsProject.instance().mapLayersByName(self._output_layer_name))
+
     def switch_input_data_mode(self):
         """ Switch input data mode:
         single point calculation: azimuth, distance
@@ -196,6 +227,7 @@ class AviationLonLatCalculator:
             self.dlg = AviationLonLatCalculatorDialog()
             self.dlg.comboBoxInputDataMode.currentIndexChanged.connect(self.switch_input_data_mode)
             self.dlg.pushButtonCancel.clicked.connect(self.dlg.close)
+            self._output_layer_name = self.create_output_layer()
 
         # show the dialog
         self.dlg.show()
