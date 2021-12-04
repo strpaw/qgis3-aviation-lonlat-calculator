@@ -210,12 +210,22 @@ class AviationLonLatCalculator:
         """ Check if output layer has been removed from layers. """
         return not bool(QgsProject.instance().mapLayersByName(self._output_layer_name))
 
+    def _switch_input_csv_access(self):
+        """ Enable/disable GUI elements to select input CSV file if input data mode is one of CSVs. """
+        if 3 <= self.dlg.comboBoxInputDataMode.currentIndex() <= 5:
+            self.dlg.labelInputCSV.setEnabled(True)
+            self.dlg.mQgsFileWidgetInputCSV.setEnabled(True)
+        else:
+            self.dlg.labelInputCSV.setEnabled(False)
+            self.dlg.mQgsFileWidgetInputCSV.setEnabled(False)
+
     def switch_input_data_mode(self):
         """ Switch input data mode:
         single point calculation: azimuth, distance
         single point calculation: azimuth, distance, offset and so on.
         """
         self.dlg.stackedWidgetInputData.setCurrentIndex(self.dlg.comboBoxInputDataMode.currentIndex())
+        self._switch_input_csv_access()
 
     def run(self):
         """Run method that performs all the real work"""
