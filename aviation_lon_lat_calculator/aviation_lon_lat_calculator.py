@@ -227,6 +227,11 @@ class AviationLonLatCalculator:
         self.dlg.stackedWidgetInputData.setCurrentIndex(self.dlg.comboBoxInputDataMode.currentIndex())
         self._switch_input_csv_access()
 
+    def calculate(self):
+        """ Calculate longitude, latitude based on input data. """
+        if self.is_output_layer_removed():
+            self._output_layer = self.create_output_layer()
+
     def run(self):
         """Run method that performs all the real work"""
 
@@ -236,8 +241,9 @@ class AviationLonLatCalculator:
             self.first_start = False
             self.dlg = AviationLonLatCalculatorDialog()
             self.dlg.comboBoxInputDataMode.currentIndexChanged.connect(self.switch_input_data_mode)
+            self.dlg.pushButtonCalculate.clicked.connect(self.calculate)
             self.dlg.pushButtonCancel.clicked.connect(self.dlg.close)
-            self._output_layer_name = self.create_output_layer()
+            self._output_layer = self.create_output_layer()
 
         # show the dialog
         self.dlg.show()
