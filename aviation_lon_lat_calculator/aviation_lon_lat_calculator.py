@@ -32,6 +32,7 @@ from .resources import *
 from .aviation_lon_lat_calculator_dialog import AviationLonLatCalculatorDialog
 import os.path
 from datetime import datetime
+from csv import DictReader
 
 
 class AviationLonLatCalculator:
@@ -227,6 +228,45 @@ class AviationLonLatCalculator:
         self.dlg.stackedWidgetInputData.setCurrentIndex(self.dlg.comboBoxInputDataMode.currentIndex())
         self._switch_input_csv_access()
 
+    def get_csv_fields(self):
+        if os.path.isfile(self.dlg.mQgsFileWidgetInputCSV.filePath()):
+            with open(self.dlg.mQgsFileWidgetInputCSV.filePath(), 'r') as f:
+                reader = DictReader(f, delimiter=';')
+                return reader.fieldnames
+
+    def _switch_csv_user_distance_UOM(self):
+        """ Enable/disable possibility to select distance UOM by user. """
+        if self.dlg.fieldAzmDistDistanceUOM.currentIndex() >= 1:
+            self.dlg.csvUserDistanceUOM.setEnabled(False)
+        else:
+            self.dlg.csvUserDistanceUOM.setEnabled(True)
+
+    def set_initial_csv_azimuth_distance_fields_assignment(self):
+        self.dlg.fieldAzmDisPointName.clear()
+        self.dlg.fieldAzmDistDistanceValue.clear()
+        self.dlg.fieldAzmDistDistanceUOM.clear()
+        self.dlg.fieldAzmDistDistanceUOM.addItem('[user UOM]')
+        self.dlg.csvUserDistanceUOM.setEnabled(True)
+        self.dlg.csvUserDistanceUOM.setCurrentIndex(0)
+        self.dlg.fieldAzmDistAzimuth.clear()
+
+    def assign_csv_azimuth_distance_fields(self, fields):
+        """ Assign CSV field value from calculation mode CSV - Azimuth, Distance if input file has been changed.
+        :param fields: list -> str
+        """
+        self.dlg.fieldAzmDisPointName.addItems(fields)
+        self.dlg.fieldAzmDistDistanceValue.addItems(fields)
+        self.dlg.fieldAzmDistDistanceUOM.addItems(fields)
+        self.dlg.fieldAzmDistAzimuth.addItems(fields)
+
+    def reset_csv_fields_assignment(self):
+        """ Reset CSV fields assignment for CSV mode calculations in case input CSV file has been changed. """
+        self.set_initial_csv_azimuth_distance_fields_assignment()
+
+        fields = self.get_csv_fields()
+        if fields:
+            self.assign_csv_azimuth_distance_fields(fields)
+
     def calculate(self):
         """ Calculate longitude, latitude based on input data. """
         if self.is_output_layer_removed():
@@ -244,11 +284,16 @@ class AviationLonLatCalculator:
             self.dlg.pushButtonCalculate.clicked.connect(self.calculate)
             self.dlg.pushButtonCancel.clicked.connect(self.dlg.close)
             self._output_layer = self.create_output_layer()
+            self.dlg.mQgsFileWidgetInputCSV.fileChanged.connect(self.reset_csv_fields_assignment)
+            self.dlg.mQgsFileWidgetInputCSV.setFilter('*.csv')
+            self.dlg.fieldAzmDistDistanceUOM.currentIndexChanged.connect(self._switch_csv_user_distance_UOM)
 
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
+        self.dlg.mQgsFileWidgetInputCSV.lineEdit().clear()
+        self.set_initial_csv_azimuth_distance_fields_assignment()
         # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and
