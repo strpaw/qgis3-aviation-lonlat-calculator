@@ -23,7 +23,7 @@
 """
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction, QWidget, QMessageBox
 from qgis.core import *
 
 # Initialize Qt resources from file resources.py
@@ -33,6 +33,10 @@ from .aviation_lon_lat_calculator_dialog import AviationLonLatCalculatorDialog
 import os.path
 from datetime import datetime
 from csv import DictReader
+from .aviation_gis_tools.distance import Distance
+from .aviation_gis_tools.bearing import Bearing
+from .aviation_gis_tools.point_calculation import PointCalculation
+from .aviation_gis_tools.angle import AT_LONGITUDE, AT_LATITUDE, Angle
 
 
 class AviationLonLatCalculator:
@@ -48,6 +52,7 @@ class AviationLonLatCalculator:
         """
         self._output_layer = None
         self._output_layer_name = None
+        self._point_calculation = None
         # Save reference to the QGIS interface
         self.iface = iface
         # initialize plugin directory
@@ -267,10 +272,55 @@ class AviationLonLatCalculator:
         if fields:
             self.assign_csv_azimuth_distance_fields(fields)
 
+    def _init_point_calculation(self):
+        self._point_calculation = PointCalculation(ref_id=self.dlg.lineEditReferenceID.text(),
+                                                   ref_lon=self.dlg.lineEditReferenceLongitude.text(),
+                                                   ref_lat=self.dlg.lineEditReferenceLatitude.text())
+
+    def _convert_csv_azimuth_distance(self):
+        self._init_point_calculation()
+        if self._point_calculation.ref_err:
+            QMessageBox.critical(QWidget(), "Message", f"Reference point error!\n{self._point_calculation.ref_err}")
+        else:
+
+            if self.dlg.fieldAzmDistDistanceUOM.currentIndex() == 0:  # UOM by user, not from input file
+                dist_uom = self.dlg.csvUserDistanceUOM.currentText()
+            else:
+                dist_uom = self.dlg.fieldAzmDistDistanceUOM.currentText()
+
+            point_name_field = self.dlg.fieldAzmDisPointName.currentText()
+            dist_field = self.dlg.fieldAzmDistDistanceValue.currentText()
+            azm_field = self.dlg.fieldAzmDistAzimuth.currentText()
+
+            provider = self._output_layer.dataProvider()
+            feature = QgsFeature(self._output_layer.fields())
+
+            with open(self.dlg.mQgsFileWidgetInputCSV.filePath()) as f:
+                reader = DictReader(f, delimiter=';')
+                for row in reader:
+                    d = Distance(row[dist_field], row[dist_uom])
+                    a = Bearing(row[azm_field])
+                    calc_position = self._point_calculation.point_by_polar_coordinates(distance=d, azimuth=a)
+                    if calc_position:
+                        lon_dd, lat_dd = calc_position
+
+                        feature['CALC_POINT'] = row[point_name_field]
+                        feature['CALC_LON'] = Angle.convert_dd_to_dms(lon_dd, AT_LONGITUDE)
+                        feature['CALC_LAT'] = Angle.convert_dd_to_dms(lon_dd, AT_LATITUDE)
+                        feature["INPUT_DATA"] = self._point_calculation.info_by_polar_coordinates(distance=d, azimuth=a)
+                        feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon_dd, lat_dd)))
+
+                        provider.addFeatures([feature])
+
+                self._output_layer.commitChanges()
+
     def calculate(self):
         """ Calculate longitude, latitude based on input data. """
         if self.is_output_layer_removed():
             self._output_layer = self.create_output_layer()
+
+        if self.dlg.stackedWidgetInputData.currentIndex() == 3:
+            self._convert_csv_azimuth_distance()
 
     def run(self):
         """Run method that performs all the real work"""
