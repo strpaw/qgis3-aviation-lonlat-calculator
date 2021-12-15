@@ -39,6 +39,15 @@ from .aviation_gis_tools.point_calculation import PointCalculation
 from .aviation_gis_tools.angle import AT_LONGITUDE, AT_LATITUDE, Angle
 
 
+def update_layer(mth):
+    def wrapper(self):
+        result = mth(self)
+        self._output_layer.commitChanges()
+        self._output_layer.updateExtents()
+        return result
+    return wrapper
+
+
 class AviationLonLatCalculator:
     """QGIS Plugin Implementation."""
 
@@ -52,6 +61,8 @@ class AviationLonLatCalculator:
         """
         self._output_layer = None
         self._output_layer_name = None
+        self._provider = None
+        self._feature = None
         self._point_calculation = None
         # Save reference to the QGIS interface
         self.iface = iface
@@ -199,18 +210,18 @@ class AviationLonLatCalculator:
         return: QgsVectorLayer
         """
         self._set_output_layer_name()
-        layer = QgsVectorLayer('Point?crs=epsg:4326', self._output_layer_name, 'memory')
-        provider = layer.dataProvider()
-        layer.startEditing()
-        provider.addAttributes([
+        self._output_layer = layer = QgsVectorLayer('Point?crs=epsg:4326', self._output_layer_name, 'memory')
+        self._provider = layer.dataProvider()
+        self._output_layer.startEditing()
+        self._provider.addAttributes([
             QgsField("CALC_POINT", QVariant.String, len=100),
             QgsField("CALC_LON", QVariant.String, len=100),
             QgsField("CALC_LAT", QVariant.String, len=100),
             QgsField("INPUT_DATA", QVariant.String, len=100),
         ])
-        layer.commitChanges()
+        self._output_layer.commitChanges()
+        self._feature = QgsFeature(self._output_layer.fields())
         QgsProject.instance().addMapLayer(layer)
-        return layer
 
     def is_output_layer_removed(self):
         """ Check if output layer has been removed from layers. """
@@ -277,6 +288,7 @@ class AviationLonLatCalculator:
                                                    ref_lon=self.dlg.lineEditReferenceLongitude.text(),
                                                    ref_lat=self.dlg.lineEditReferenceLatitude.text())
 
+    @update_layer
     def _convert_csv_azimuth_distance(self):
         self._init_point_calculation()
         if self._point_calculation.ref_err:
@@ -292,9 +304,6 @@ class AviationLonLatCalculator:
             dist_field = self.dlg.fieldAzmDistDistanceValue.currentText()
             azm_field = self.dlg.fieldAzmDistAzimuth.currentText()
 
-            provider = self._output_layer.dataProvider()
-            feature = QgsFeature(self._output_layer.fields())
-
             with open(self.dlg.mQgsFileWidgetInputCSV.filePath()) as f:
                 reader = DictReader(f, delimiter=';')
                 for row in reader:
@@ -304,20 +313,18 @@ class AviationLonLatCalculator:
                     if calc_position:
                         lon_dd, lat_dd = calc_position
 
-                        feature['CALC_POINT'] = row[point_name_field]
-                        feature['CALC_LON'] = Angle.convert_dd_to_dms(lon_dd, AT_LONGITUDE)
-                        feature['CALC_LAT'] = Angle.convert_dd_to_dms(lon_dd, AT_LATITUDE)
-                        feature["INPUT_DATA"] = self._point_calculation.info_by_polar_coordinates(distance=d, azimuth=a)
-                        feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon_dd, lat_dd)))
+                        self._feature['CALC_POINT'] = row[point_name_field]
+                        self._feature['CALC_LON'] = Angle.convert_dd_to_dms(lon_dd, AT_LONGITUDE)
+                        self._feature['CALC_LAT'] = Angle.convert_dd_to_dms(lon_dd, AT_LATITUDE)
+                        self._feature["INPUT_DATA"] = self._point_calculation.info_by_polar_coordinates(distance=d, azimuth=a)
+                        self._feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon_dd, lat_dd)))
 
-                        provider.addFeatures([feature])
-
-                self._output_layer.commitChanges()
+                        self._provider.addFeatures([self._feature])
 
     def calculate(self):
         """ Calculate longitude, latitude based on input data. """
         if self.is_output_layer_removed():
-            self._output_layer = self.create_output_layer()
+            self.create_output_layer()
 
         if self.dlg.stackedWidgetInputData.currentIndex() == 3:
             self._convert_csv_azimuth_distance()
@@ -333,7 +340,7 @@ class AviationLonLatCalculator:
             self.dlg.comboBoxInputDataMode.currentIndexChanged.connect(self.switch_input_data_mode)
             self.dlg.pushButtonCalculate.clicked.connect(self.calculate)
             self.dlg.pushButtonCancel.clicked.connect(self.dlg.close)
-            self._output_layer = self.create_output_layer()
+            self.create_output_layer()
             self.dlg.mQgsFileWidgetInputCSV.fileChanged.connect(self.reset_csv_fields_assignment)
             self.dlg.mQgsFileWidgetInputCSV.setFilter('*.csv')
             self.dlg.fieldAzmDistDistanceUOM.currentIndexChanged.connect(self._switch_csv_user_distance_UOM)
