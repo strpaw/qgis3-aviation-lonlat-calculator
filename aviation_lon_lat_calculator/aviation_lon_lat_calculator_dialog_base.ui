@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>767</width>
-    <height>619</height>
+    <width>810</width>
+    <height>663</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -201,8 +201,8 @@
     <rect>
      <x>20</x>
      <y>240</y>
-     <width>688</width>
-     <height>291</height>
+     <width>691</width>
+     <height>341</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -725,14 +725,14 @@
      <widget class="QLabel" name="label_11">
       <property name="geometry">
        <rect>
-        <x>20</x>
+        <x>30</x>
         <y>30</y>
-        <width>111</width>
+        <width>71</width>
         <height>21</height>
        </rect>
       </property>
       <property name="text">
-       <string>Point name</string>
+       <string>ID/Name</string>
       </property>
      </widget>
     </widget>
@@ -885,41 +885,477 @@
     </widget>
    </widget>
    <widget class="QWidget" name="page_5">
+    <widget class="QComboBox" name="comboBoxAdoCSVFieldAzimuth">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>190</y>
+       <width>327</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
     <widget class="QLabel" name="label_13">
      <property name="geometry">
       <rect>
-       <x>170</x>
-       <y>100</y>
-       <width>211</width>
+       <x>30</x>
+       <y>32</y>
+       <width>251</width>
        <height>16</height>
       </rect>
      </property>
      <property name="text">
-      <string>CSV Azimuth, distance offset</string>
+      <string>Input fields:</string>
      </property>
+    </widget>
+    <widget class="QComboBox" name="comboBoxAdoCSVFieldDistanceUOM">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>150</y>
+       <width>327</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>[user UOM]</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QComboBox" name="comboBoxAdoUserDistanceUOM">
+     <property name="geometry">
+      <rect>
+       <x>490</x>
+       <y>150</y>
+       <width>92</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>m</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>km</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>NM</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>feet</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SM</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QComboBox" name="comboBoxAdoCSVFieldCalculatedPointID">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>70</y>
+       <width>327</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_19">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>112</y>
+       <width>68</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Dist:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_20">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>192</y>
+       <width>68</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Azm:</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBoxAdoCSVFieldDistanceValue">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>110</y>
+       <width>327</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_21">
+     <property name="geometry">
+      <rect>
+       <x>29</x>
+       <y>155</y>
+       <width>90</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Dist UOM:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_22">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>70</y>
+       <width>91</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Calc ID/Name:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_23">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>230</y>
+       <width>68</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Offset side:</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBoxAdoCSVFieldOffsetSide">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>228</y>
+       <width>327</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_24">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>270</y>
+       <width>91</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Offset distance:</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBoxAdoCSVFieldOffsetDistanceValue">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>268</y>
+       <width>327</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_25">
+     <property name="geometry">
+      <rect>
+       <x>29</x>
+       <y>313</y>
+       <width>90</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Offset dist UOM:</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBoxAdoCSVFieldOffsetDistanceUOM">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>308</y>
+       <width>327</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>[user UOM]</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QComboBox" name="comboBoxAdoUserOffsetDistanceUOM">
+     <property name="geometry">
+      <rect>
+       <x>490</x>
+       <y>308</y>
+       <width>92</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>m</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>km</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>NM</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>feet</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SM</string>
+      </property>
+     </item>
     </widget>
    </widget>
    <widget class="QWidget" name="page_6">
-    <widget class="QLabel" name="label_14">
+    <widget class="QGroupBox" name="groupBox_3">
      <property name="geometry">
       <rect>
-       <x>130</x>
-       <y>70</y>
-       <width>231</width>
-       <height>16</height>
+       <x>20</x>
+       <y>30</y>
+       <width>531</width>
+       <height>101</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Axes definition</string>
+     </property>
+     <widget class="QLabel" name="label_14">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>191</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>X axis azimuth/bearing</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEditCartesianCSVAxisXBearing">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>30</y>
+        <width>113</width>
+        <height>27</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_26">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>60</y>
+        <width>161</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Y axis orientation</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="comboBoxCartesianCSVAxisYOrientation">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>60</y>
+        <width>92</width>
+        <height>27</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>LEFT</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>RIGHT</string>
+       </property>
+      </item>
+     </widget>
+    </widget>
+    <widget class="QComboBox" name="comboBoxCartesianCSVFieldCalculatedPointID">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>148</y>
+       <width>327</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_27">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>148</y>
+       <width>91</width>
+       <height>19</height>
       </rect>
      </property>
      <property name="text">
-      <string>CSV Local cartesian</string>
+      <string>Calc ID/Name:</string>
      </property>
+    </widget>
+    <widget class="QComboBox" name="comboBoxCartesianCSVFieldAxisXValue">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>188</y>
+       <width>327</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_28">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>190</y>
+       <width>68</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>X</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBoxCartesianCSVAxisXUOM">
+     <property name="geometry">
+      <rect>
+       <x>490</x>
+       <y>188</y>
+       <width>92</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>m</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>KM</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>NM</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>feet</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SM</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLabel" name="label_29">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>240</y>
+       <width>68</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>X</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBoxCartesianCSVFieldAxisYValue">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>238</y>
+       <width>327</width>
+       <height>25</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="comboBoxCartesianCSVAxisYUOM">
+     <property name="geometry">
+      <rect>
+       <x>490</x>
+       <y>238</y>
+       <width>92</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>m</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>KM</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>NM</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>feet</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SM</string>
+      </property>
+     </item>
     </widget>
    </widget>
   </widget>
   <widget class="QPushButton" name="pushButtonCalculate">
    <property name="geometry">
     <rect>
-     <x>480</x>
-     <y>570</y>
+     <x>490</x>
+     <y>610</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -931,8 +1367,8 @@
   <widget class="QPushButton" name="pushButtonCancel">
    <property name="geometry">
     <rect>
-     <x>580</x>
-     <y>570</y>
+     <x>590</x>
+     <y>610</y>
      <width>93</width>
      <height>28</height>
     </rect>
