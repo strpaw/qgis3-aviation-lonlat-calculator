@@ -329,6 +329,91 @@ class AviationLonLatCalculator:
         if self.dlg.stackedWidgetInputData.currentIndex() == 3:
             self._convert_csv_azimuth_distance()
 
+    def _clear_reference_point(self):
+        """ Clear content of Reference point data. """
+        self.dlg.lineEditReferenceID.clear()
+        self.dlg.lineEditReferenceLongitude.clear()
+        self.dlg.lineEditReferenceLatitude.clear()
+
+    def _clear_polar_point_input(self):
+        """ Clear content of Azimuth, distance (polar coordinates) single point mode data/settings. """
+        self.dlg.lineEditPolarPointCalculatedPointID.clear()
+        self.dlg.lineEditPolarPointDistanceValue.clear()
+        self.dlg.lineEditPolarPointAzimuth.clear()
+        self.dlg.comboBoxPolarPointDistanceUOM.setCurrentIndex(0)
+
+    def _clear_ado_point_input(self):
+        """ Clear content of Azimuth, distance, offset single point mode data/settings. """
+        self.dlg.lineEditAdoPointCalculatedPointID.clear()
+        self.dlg.lineEditAdoPointDistanceValue.clear()
+        self.dlg.comboBoxAdoPointDistanceUOM.setCurrentIndex(0)
+        self.dlg.lineEditAdoPointAzimuth.clear()
+        self.dlg.comboBoxAdoPointOffsetSide.setCurrentIndex(0)
+        self.dlg.lineEditAdoPointOffsetDistanceValue.clear()
+        self.dlg.comboBoxAdoPointOffsetDistanceUOM.setCurrentIndex(0)
+
+    def _clear_cartesian_point_input(self):
+        """ Clear content of Cartesian point mode data/settings. """
+        self.dlg.lineEditCartersianPointXAxisBearing.clear()
+        self.dlg.comboBoxCartesianPointYAxisOrientation.setCurrentIndex(0)
+        self.dlg.lineEditCartesianPointCalculatedPointID.clear()
+        self.dlg.lineEditCartesianPointAxisXValue.clear()
+        self.dlg.comboBoxCartesianPointAxisXUOM.setCurrentIndex(0)
+        self.dlg.lineEditCartesianPointAxisYValue.clear()
+        self.dlg.comboBoxCartesianPointAxisYUOM.setCurrentIndex(0)
+
+    def _clear_polar_csv_input(self):
+        """ Clear content of Azimuth, distance (polar coordinates) CSV mode data/settings. """
+        self.dlg.comboBoxPolarCSVFieldCalculatedPointID.clear()
+        self.dlg.comboBoxPolarCSVFieldDistanceValue.clear()
+        self.dlg.comboBoxPolarCSVFieldDistanceUOM.clear()
+        self.dlg.comboBoxPolarCSVFieldDistanceUOM.addItem('[user UOM]')
+        self.dlg.comboBoxPolarCSVUserDistanceUOM.setEnabled(True)
+        self.dlg.comboBoxPolarCSVUserDistanceUOM.setCurrentIndex(0)
+        self.dlg.comboBoxPolarCSVFieldAzimuth.clear()
+
+    def _clear_ado_csv_input(self):
+        """ Clear content of Azimuth, distance, offset CSV mode data/settings. """
+        self.dlg.comboBoxAdoCSVFieldCalculatedPointID.clear()
+        self.dlg.comboBoxAdoCSVFieldDistanceValue.clear()
+        self.dlg.comboBoxAdoCSVFieldDistanceUOM.clear()
+        self.dlg.comboBoxAdoCSVFieldDistanceUOM.addItem('[user UOM]')
+        self.dlg.comboBoxAdoUserDistanceUOM.setEnabled(True)
+        self.dlg.comboBoxAdoUserDistanceUOM.setCurrentIndex(0)
+        self.dlg.comboBoxAdoCSVFieldAzimuth.clear()
+        self.dlg.comboBoxAdoCSVFieldOffsetSide.clear()
+        self.dlg.comboBoxAdoCSVFieldOffsetDistanceValue.clear()
+        self.dlg.comboBoxAdoCSVFieldOffsetDistanceUOM.clear()
+        self.dlg.comboBoxAdoCSVFieldOffsetDistanceUOM.addItem('[user UOM]')
+        self.dlg.comboBoxAdoUserOffsetDistanceUOM.setEnabled(True)
+        self.dlg.comboBoxAdoUserOffsetDistanceUOM.setCurrentIndex(0)
+
+    def _clear_cartesian_csv_input(self):
+        """ Clear content of Cartesian CSV mode data/settings. """
+        self.dlg.lineEditCartesianCSVAxisXBearing.clear()
+        self.dlg.comboBoxCartesianCSVAxisYOrientation.setCurrentIndex(0)
+        self.dlg.comboBoxCartesianCSVFieldCalculatedPointID.clear()
+        self.dlg.comboBoxCartesianCSVFieldAxisXValue.clear()
+        self.dlg.comboBoxCartesianCSVAxisXUOM.setCurrentIndex(0)
+        self.dlg.comboBoxCartesianCSVFieldAxisYValue.clear()
+        self.dlg.comboBoxCartesianCSVAxisYUOM.setCurrentIndex(0)
+
+    def set_gui_default(self):
+        """ Set initial values/settings of input data. Clear all input and set combobox items with current selection
+        as first item on the combobox list. """
+        self._clear_reference_point()
+        self.dlg.comboBoxInputDataMode.setCurrentIndex(0)
+        self.dlg.stackedWidgetInputData.setCurrentIndex(0)
+        self.dlg.mQgsFileWidgetInputCSV.lineEdit().clear()
+        self.dlg.labelInputCSV.setEnabled(False)
+        self.dlg.mQgsFileWidgetInputCSV.setEnabled(False)
+        self._clear_polar_point_input()
+        self._clear_ado_point_input()
+        self._clear_cartesian_point_input()
+        self._clear_polar_csv_input()
+        self._clear_ado_csv_input()
+        self._clear_cartesian_csv_input()
+
     def run(self):
         """Run method that performs all the real work"""
 
@@ -337,6 +422,7 @@ class AviationLonLatCalculator:
         if self.first_start == True:
             self.first_start = False
             self.dlg = AviationLonLatCalculatorDialog()
+            self.set_gui_default()
             self.dlg.comboBoxInputDataMode.currentIndexChanged.connect(self.switch_input_data_mode)
             self.dlg.pushButtonCalculate.clicked.connect(self.calculate)
             self.dlg.pushButtonCancel.clicked.connect(self.dlg.close)
@@ -349,8 +435,7 @@ class AviationLonLatCalculator:
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
-        self.dlg.mQgsFileWidgetInputCSV.lineEdit().clear()
-        self.set_initial_csv_azimuth_distance_fields_assignment()
+        self.set_gui_default()
         # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and
