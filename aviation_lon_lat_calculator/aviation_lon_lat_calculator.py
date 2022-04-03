@@ -252,27 +252,27 @@ class AviationLonLatCalculator:
 
     def _switch_csv_user_distance_UOM(self):
         """ Enable/disable possibility to select distance UOM by user. """
-        if self.dlg.fieldAzmDistDistanceUOM.currentIndex() >= 1:
-            self.dlg.csvUserDistanceUOM.setEnabled(False)
+        if self.dlg.comboBoxPolarCSVFieldDistanceUOM.currentIndex() >= 1:
+            self.dlg.comboBoxPolarCSVUserDistanceUOM.setEnabled(False)
         else:
-            self.dlg.csvUserDistanceUOM.setEnabled(True)
+            self.dlg.comboBoxPolarCSVUserDistanceUOM.setEnabled(True)
 
     def set_initial_csv_azimuth_distance_fields_assignment(self):
-        self.dlg.fieldAzmDisPointName.clear()
-        self.dlg.fieldAzmDistDistanceValue.clear()
-        self.dlg.fieldAzmDistDistanceUOM.clear()
-        self.dlg.fieldAzmDistDistanceUOM.addItem('[user UOM]')
-        self.dlg.csvUserDistanceUOM.setEnabled(True)
-        self.dlg.csvUserDistanceUOM.setCurrentIndex(0)
-        self.dlg.fieldAzmDistAzimuth.clear()
+        self.dlg.comboBoxPolarCSVFieldCalculatedPointID.clear()
+        self.dlg.comboBoxPolarCSVFieldDistanceValue.clear()
+        self.dlg.comboBoxPolarCSVFieldDistanceUOM.clear()
+        self.dlg.comboBoxPolarCSVFieldDistanceUOM.addItem('[user UOM]')
+        self.dlg.comboBoxPolarCSVUserDistanceUOM.setEnabled(True)
+        self.dlg.comboBoxPolarCSVUserDistanceUOM.setCurrentIndex(0)
+        self.dlg.comboBoxPolarCSVFieldAzimuth.clear()
 
     def assign_csv_azimuth_distance_fields(self, fields):
         """ Assign CSV field value from calculation mode CSV - Azimuth, Distance if input file has been changed.
         :param fields: list -> str
         """
-        self.dlg.fieldAzmDisPointName.addItems(fields)
+        self.dlg.comboBoxPolarCSVFieldCalculatedPointID.addItems(fields)
         self.dlg.fieldAzmDistDistanceValue.addItems(fields)
-        self.dlg.fieldAzmDistDistanceUOM.addItems(fields)
+        self.dlg.comboBoxPolarCSVFieldDistanceUOM.addItems(fields)
         self.dlg.fieldAzmDistAzimuth.addItems(fields)
 
     def reset_csv_fields_assignment(self):
@@ -295,12 +295,12 @@ class AviationLonLatCalculator:
             QMessageBox.critical(QWidget(), "Message", f"Reference point error!\n{self._point_calculation.ref_err}")
         else:
 
-            if self.dlg.fieldAzmDistDistanceUOM.currentIndex() == 0:  # UOM by user, not from input file
+            if self.dlg.comboBoxPolarCSVFieldDistanceUOM.currentIndex() == 0:  # UOM by user, not from input file
                 dist_uom = self.dlg.csvUserDistanceUOM.currentText()
             else:
-                dist_uom = self.dlg.fieldAzmDistDistanceUOM.currentText()
+                dist_uom = self.dlg.comboBoxPolarCSVFieldDistanceUOM.currentText()
 
-            point_name_field = self.dlg.fieldAzmDisPointName.currentText()
+            point_name_field = self.dlg.comboBoxPolarCSVFieldCalculatedPointID.currentText()
             dist_field = self.dlg.fieldAzmDistDistanceValue.currentText()
             azm_field = self.dlg.fieldAzmDistAzimuth.currentText()
 
@@ -343,7 +343,7 @@ class AviationLonLatCalculator:
             self.create_output_layer()
             self.dlg.mQgsFileWidgetInputCSV.fileChanged.connect(self.reset_csv_fields_assignment)
             self.dlg.mQgsFileWidgetInputCSV.setFilter('*.csv')
-            self.dlg.fieldAzmDistDistanceUOM.currentIndexChanged.connect(self._switch_csv_user_distance_UOM)
+            self.dlg.comboBoxPolarCSVFieldDistanceUOM.currentIndexChanged.connect(self._switch_csv_user_distance_UOM)
 
         # show the dialog
         self.dlg.show()

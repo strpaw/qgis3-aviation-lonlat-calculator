@@ -167,7 +167,7 @@
    </property>
    <item>
     <property name="text">
-     <string>Azimuth, distance</string>
+     <string>Azimuth, distance (polar coordinates)</string>
     </property>
    </item>
    <item>
@@ -206,10 +206,10 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>3</number>
    </property>
    <widget class="QWidget" name="page">
-    <widget class="QLineEdit" name="lineEditPointPolarCalculatedPointID">
+    <widget class="QLineEdit" name="lineEditPolarPointCalculatedPointID">
      <property name="geometry">
       <rect>
        <x>135</x>
@@ -219,7 +219,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QLineEdit" name="lineEditPointPolarDistanceValue">
+    <widget class="QLineEdit" name="lineEditPolarPointDistanceValue">
      <property name="geometry">
       <rect>
        <x>136</x>
@@ -229,7 +229,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QLineEdit" name="lineEditPointPolarAzimuth">
+    <widget class="QLineEdit" name="lineEditPolarPointAzimuth">
      <property name="geometry">
       <rect>
        <x>136</x>
@@ -249,7 +249,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>ID/Name</string>
+      <string>Calc. ID</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_2">
@@ -278,7 +278,7 @@
       <string>Azimuth</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="comboBoxPointPolarDistanceUOM">
+    <widget class="QComboBox" name="comboBoxPolarPointDistanceUOM">
      <property name="geometry">
       <rect>
        <x>263</x>
@@ -328,7 +328,7 @@
       <string>Distance</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="lineEditPointADODistanceValue">
+    <widget class="QLineEdit" name="lineEditAdoPointDistanceValue">
      <property name="geometry">
       <rect>
        <x>139</x>
@@ -351,7 +351,7 @@
       <string>Azimuth</string>
      </property>
     </widget>
-    <widget class="QLineEdit" name="lineEditPointADOAzimuth">
+    <widget class="QLineEdit" name="lineEditAdoPointAzimuth">
      <property name="geometry">
       <rect>
        <x>139</x>
@@ -371,10 +371,10 @@
       </rect>
      </property>
      <property name="text">
-      <string>ID/Name</string>
+      <string>Calc. ID</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="comboBoxPointADODistanceUOM">
+    <widget class="QComboBox" name="comboBoxAdoPointDistanceUOM">
      <property name="geometry">
       <rect>
        <x>266</x>
@@ -409,7 +409,7 @@
       </property>
      </item>
     </widget>
-    <widget class="QLineEdit" name="lineEditPointADOCalculatedPointID">
+    <widget class="QLineEdit" name="lineEditAdoPointCalculatedPointID">
      <property name="geometry">
       <rect>
        <x>138</x>
@@ -432,7 +432,7 @@
       <string>Offsed side</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="comboBoxPointADOOffsetSide">
+    <widget class="QComboBox" name="comboBoxAdoPointOffsetSide">
      <property name="geometry">
       <rect>
        <x>140</x>
@@ -452,7 +452,7 @@
       </property>
      </item>
     </widget>
-    <widget class="QLineEdit" name="lineEditPointADOOffsetDistanceValue">
+    <widget class="QLineEdit" name="lineEditAdoPointOffsetDistanceValue">
      <property name="geometry">
       <rect>
        <x>138</x>
@@ -462,7 +462,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QComboBox" name="comboBoxPointADOOffsetDistanceUOM">
+    <widget class="QComboBox" name="comboBoxAdoPointOffsetDistanceUOM">
      <property name="geometry">
       <rect>
        <x>265</x>
@@ -537,7 +537,7 @@
        <string>X axis azimuth/bearing</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="lineEditPointCartersianAxisBearing">
+     <widget class="QLineEdit" name="lineEditCartersianPointXAxisBearing">
       <property name="geometry">
        <rect>
         <x>200</x>
@@ -560,7 +560,7 @@
        <string>Y axis orientation</string>
       </property>
      </widget>
-     <widget class="QComboBox" name="comboBoxPointCartesianYAxisOrientation">
+     <widget class="QComboBox" name="comboBoxCartesianPointYAxisOrientation">
       <property name="geometry">
        <rect>
         <x>200</x>
@@ -609,7 +609,7 @@
        <string>X</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="lineEditPointCartesianX">
+     <widget class="QLineEdit" name="lineEditCartesianPointAxisXValue">
       <property name="geometry">
        <rect>
         <x>120</x>
@@ -619,7 +619,7 @@
        </rect>
       </property>
      </widget>
-     <widget class="QComboBox" name="comboBoxPointCartesianXUOM">
+     <widget class="QComboBox" name="comboBoxCartesianPointAxisXUOM">
       <property name="geometry">
        <rect>
         <x>280</x>
@@ -667,7 +667,7 @@
        <string>Y</string>
       </property>
      </widget>
-     <widget class="QLineEdit" name="lineEditPointCartesianY">
+     <widget class="QLineEdit" name="lineEditCartesianPointAxisYValue">
       <property name="geometry">
        <rect>
         <x>120</x>
@@ -677,7 +677,7 @@
        </rect>
       </property>
      </widget>
-     <widget class="QComboBox" name="comboBoxPointCartesianYUOM">
+     <widget class="QComboBox" name="comboBoxCartesianPointAxisYUOM">
       <property name="geometry">
        <rect>
         <x>280</x>
@@ -712,7 +712,7 @@
        </property>
       </item>
      </widget>
-     <widget class="QLineEdit" name="lineEditPointCartesianCalculatedPointID">
+     <widget class="QLineEdit" name="lineEditCartesianPointCalculatedPointID">
       <property name="geometry">
        <rect>
         <x>120</x>
@@ -732,7 +732,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>ID/Name</string>
+       <string>Calc. ID</string>
       </property>
      </widget>
     </widget>
@@ -751,7 +751,7 @@
       <string>Input fields:</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="fieldAzmDistDistanceValue">
+    <widget class="QComboBox" name="comboBoxPolarCSVFieldDistanceValue">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -761,7 +761,7 @@
       </rect>
      </property>
     </widget>
-    <widget class="QComboBox" name="fieldAzmDistDistanceUOM">
+    <widget class="QComboBox" name="comboBoxPolarCSVFieldDistanceUOM">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -776,7 +776,7 @@
       </property>
      </item>
     </widget>
-    <widget class="QComboBox" name="fieldAzmDisPointName">
+    <widget class="QComboBox" name="comboBoxPolarCSVFieldCalculatedPointID">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -796,7 +796,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Azm:</string>
+      <string>Azimuth:</string>
      </property>
     </widget>
     <widget class="QLabel" name="label_16">
@@ -825,7 +825,7 @@
       <string>Dist:</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="fieldAzmDistAzimuth">
+    <widget class="QComboBox" name="comboBoxPolarCSVFieldAzimuth">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -848,7 +848,7 @@
       <string>Dist UOM:</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="csvUserDistanceUOM">
+    <widget class="QComboBox" name="comboBoxPolarCSVUserDistanceUOM">
      <property name="geometry">
       <rect>
        <x>440</x>
@@ -991,7 +991,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Azm:</string>
+      <string>Azimuth:</string>
      </property>
     </widget>
     <widget class="QComboBox" name="comboBoxAdoCSVFieldDistanceValue">
