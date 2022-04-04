@@ -32,6 +32,7 @@ from .resources import *
 from .aviation_lon_lat_calculator_dialog import AviationLonLatCalculatorDialog
 import os.path
 from datetime import datetime
+from functools import partial
 from csv import DictReader
 from .aviation_gis_tools.distance import Distance
 from .aviation_gis_tools.bearing import Bearing
@@ -227,19 +228,6 @@ class AviationLonLatCalculator:
         """ Check if output layer has been removed from layers. """
         return not bool(QgsProject.instance().mapLayersByName(self._output_layer_name))
 
-    def get_csv_fields(self):
-        if os.path.isfile(self.dlg.mQgsFileWidgetInputCSV.filePath()):
-            with open(self.dlg.mQgsFileWidgetInputCSV.filePath(), 'r') as f:
-                reader = DictReader(f, delimiter=';')
-                return reader.fieldnames
-
-    def _switch_csv_user_distance_UOM(self):
-        """ Enable/disable possibility to select distance UOM by user. """
-        if self.dlg.comboBoxPolarCSVFieldDistanceUOM.currentIndex() >= 1:
-            self.dlg.comboBoxPolarCSVUserDistanceUOM.setEnabled(False)
-        else:
-            self.dlg.comboBoxPolarCSVUserDistanceUOM.setEnabled(True)
-
     def set_initial_csv_azimuth_distance_fields_assignment(self):
         self.dlg.comboBoxPolarCSVFieldCalculatedPointID.clear()
         self.dlg.comboBoxPolarCSVFieldDistanceValue.clear()
@@ -248,23 +236,6 @@ class AviationLonLatCalculator:
         self.dlg.comboBoxPolarCSVUserDistanceUOM.setEnabled(True)
         self.dlg.comboBoxPolarCSVUserDistanceUOM.setCurrentIndex(0)
         self.dlg.comboBoxPolarCSVFieldAzimuth.clear()
-
-    def assign_csv_azimuth_distance_fields(self, fields):
-        """ Assign CSV field value from calculation mode CSV - Azimuth, Distance if input file has been changed.
-        :param fields: list -> str
-        """
-        self.dlg.comboBoxPolarCSVFieldCalculatedPointID.addItems(fields)
-        self.dlg.fieldAzmDistDistanceValue.addItems(fields)
-        self.dlg.comboBoxPolarCSVFieldDistanceUOM.addItems(fields)
-        self.dlg.fieldAzmDistAzimuth.addItems(fields)
-
-    def reset_csv_fields_assignment(self):
-        """ Reset CSV fields assignment for CSV mode calculations in case input CSV file has been changed. """
-        self.set_initial_csv_azimuth_distance_fields_assignment()
-
-        fields = self.get_csv_fields()
-        if fields:
-            self.assign_csv_azimuth_distance_fields(fields)
 
     def _init_point_calculation(self):
         self._point_calculation = PointCalculation(ref_id=self.dlg.lineEditReferenceID.text(),
@@ -419,6 +390,71 @@ class AviationLonLatCalculator:
         self._clear_ado_csv_input()
         self._clear_cartesian_csv_input()
 
+    @staticmethod
+    def _set_user_distance_uom_mode(field_widget, user_widget):
+        """ Enable/disable combobox with user distance UOM (unit of measure),
+        in case input CSV data does not contain distance UOM.
+        Args:
+            field_widget (): QComboBox, distance UOM from CSV field
+            user_widget (): QComboBox,  distance UOM from user related to distance UOM from CSV field
+        """
+        user_widget.setEnabled(True) if field_widget.currentIndex() == 0 else user_widget.setEnabled(False)
+
+    def get_csv_fields(self):
+        if os.path.isfile(self.dlg.mQgsFileWidgetInputCSV.filePath()):
+            with open(self.dlg.mQgsFileWidgetInputCSV.filePath(), 'r') as f:
+                reader = DictReader(f, delimiter=';')
+                return reader.fieldnames
+
+    def _assign_polar_csv_fields(self, fields):
+        """ Assign CSV fields from input CSV file.
+        Args:
+            fields (): list[str]
+        """
+        self.dlg.comboBoxPolarCSVFieldCalculatedPointID.addItems(fields)
+        self.dlg.comboBoxPolarCSVFieldDistanceValue.addItems(fields)
+        self.dlg.comboBoxPolarCSVFieldDistanceUOM.addItems(fields)
+        self.dlg.comboBoxPolarCSVFieldAzimuth.addItems(fields)
+
+    def _assign_ado_csv_fields(self, fields):
+        """ Assign CSV fields from input CSV file.
+        Args:
+            fields (): list[str]
+        """
+        self.dlg.comboBoxAdoCSVFieldCalculatedPointID.addItems(fields)
+        self.dlg.comboBoxAdoCSVFieldDistanceValue.addItems(fields)
+        self.dlg.comboBoxAdoCSVFieldDistanceUOM.addItems(fields)
+        self.dlg.comboBoxAdoCSVFieldAzimuth.addItems(fields)
+        self.dlg.comboBoxAdoCSVFieldOffsetSide.addItems(fields)
+        self.dlg.comboBoxAdoCSVFieldOffsetDistanceValue.addItems(fields)
+        self.dlg.comboBoxAdoCSVFieldOffsetDistanceUOM.addItems(fields)
+
+    def _assign_cartesian_csv_fields(self, fields):
+        """ Assign CSV fields from input CSV file.
+        Args:
+            fields (): list[str]
+        """
+        self.dlg.comboBoxCartesianCSVFieldCalculatedPointID.addItems(fields)
+        self.dlg.comboBoxCartesianCSVFieldAxisXValue.addItems(fields)
+        self.dlg.comboBoxCartesianCSVFieldAxisYValue.addItems(fields)
+
+    def reset_csv_fields_assignment(self):
+        """ Reset CSV fields assignment for CSV mode calculations in case input CSV file has been changed. """
+        self.set_initial_csv_azimuth_distance_fields_assignment()
+
+        fields = self.get_csv_fields()
+        if fields:
+            if self.dlg.stackedWidgetInputData.currentIndex() == 3:
+                self._clear_polar_csv_input()
+                self._assign_polar_csv_fields(fields)
+            elif self.dlg.stackedWidgetInputData.currentIndex() == 4:
+                self._clear_ado_csv_input()
+                self._assign_ado_csv_fields(fields)
+            elif self.dlg.stackedWidgetInputData.currentIndex() == 5:
+                self.dlg.comboBoxCartesianCSVFieldAxisXValue.clear()
+                self.dlg.comboBoxCartesianCSVFieldAxisYValue.clear()
+                self._assign_cartesian_csv_fields(fields)
+
     def run(self):
         """Run method that performs all the real work"""
 
@@ -434,7 +470,19 @@ class AviationLonLatCalculator:
             self.create_output_layer()
             self.dlg.mQgsFileWidgetInputCSV.fileChanged.connect(self.reset_csv_fields_assignment)
             self.dlg.mQgsFileWidgetInputCSV.setFilter('*.csv')
-            self.dlg.comboBoxPolarCSVFieldDistanceUOM.currentIndexChanged.connect(self._switch_csv_user_distance_UOM)
+            self.dlg.comboBoxPolarCSVFieldDistanceUOM.currentIndexChanged.connect(
+                partial(self._set_user_distance_uom_mode,
+                        field_widget=self.dlg.comboBoxPolarCSVFieldDistanceUOM,
+                        user_widget=self.dlg.comboBoxPolarCSVUserDistanceUOM)
+            )
+            self.dlg.comboBoxAdoCSVFieldDistanceUOM.currentIndexChanged.connect(
+                partial(self._set_user_distance_uom_mode,
+                        field_widget=self.dlg.comboBoxAdoCSVFieldDistanceUOM,
+                        user_widget=self.dlg.comboBoxAdoUserDistanceUOM))
+            self.dlg.comboBoxAdoCSVFieldOffsetDistanceUOM.currentIndexChanged.connect(
+                partial(self._set_user_distance_uom_mode,
+                        field_widget=self.dlg.comboBoxAdoCSVFieldOffsetDistanceUOM,
+                        user_widget=self.dlg.comboBoxAdoUserOffsetDistanceUOM))
 
         # show the dialog
         self.dlg.show()
