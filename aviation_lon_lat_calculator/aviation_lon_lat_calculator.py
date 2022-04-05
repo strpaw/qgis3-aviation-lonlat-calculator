@@ -192,7 +192,6 @@ class AviationLonLatCalculator:
         # will be set False in run()
         self.first_start = True
 
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -200,33 +199,6 @@ class AviationLonLatCalculator:
                 self.tr(u'&AviationLonLatCalculator'),
                 action)
             self.iface.removeToolBarIcon(action)
-
-    def _set_output_layer_name(self):
-        """ Note: layer name is generated from timestamp. """
-        timestamp = datetime.now()
-        self._output_layer_name = "CalPoints_{}".format(timestamp.strftime("%Y_%m_%d_%H%M%f"))
-
-    def create_output_layer(self):
-        """ Create point layer to store calculated points.
-        return: QgsVectorLayer
-        """
-        self._set_output_layer_name()
-        self._output_layer = layer = QgsVectorLayer('Point?crs=epsg:4326', self._output_layer_name, 'memory')
-        self._provider = layer.dataProvider()
-        self._output_layer.startEditing()
-        self._provider.addAttributes([
-            QgsField("CALC_POINT", QVariant.String, len=100),
-            QgsField("CALC_LON", QVariant.String, len=100),
-            QgsField("CALC_LAT", QVariant.String, len=100),
-            QgsField("INPUT_DATA", QVariant.String, len=100),
-        ])
-        self._output_layer.commitChanges()
-        self._feature = QgsFeature(self._output_layer.fields())
-        QgsProject.instance().addMapLayer(layer)
-
-    def is_output_layer_removed(self):
-        """ Check if output layer has been removed from layers. """
-        return not bool(QgsProject.instance().mapLayersByName(self._output_layer_name))
 
     def set_initial_csv_azimuth_distance_fields_assignment(self):
         self.dlg.comboBoxPolarCSVFieldCalculatedPointID.clear()
@@ -274,14 +246,6 @@ class AviationLonLatCalculator:
                         self._feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon_dd, lat_dd)))
 
                         self._provider.addFeatures([self._feature])
-
-    def calculate(self):
-        """ Calculate longitude, latitude based on input data. """
-        if self.is_output_layer_removed():
-            self.create_output_layer()
-
-        if self.dlg.stackedWidgetInputData.currentIndex() == 3:
-            self._convert_csv_azimuth_distance()
 
     def _clear_reference_point(self):
         """ Clear content of Reference point data. """
@@ -455,6 +419,42 @@ class AviationLonLatCalculator:
                 self.dlg.comboBoxCartesianCSVFieldAxisYValue.clear()
                 self._assign_cartesian_csv_fields(fields)
 
+    # Output layer handling
+
+    def _set_output_layer_name(self):
+        """ Note: layer name is generated from timestamp. """
+        timestamp = datetime.now()
+        self._output_layer_name = "CalPoints_{}".format(timestamp.strftime("%Y_%m_%d_%H%M%f"))
+
+    def is_output_layer_removed(self):
+        """ Check if output layer has been removed from layers. """
+        return not QgsProject.instance().mapLayersByName(self._output_layer_name)
+
+    def create_output_layer(self):
+        """ Create point layer to store calculated points.
+        return: QgsVectorLayer
+        """
+        self._set_output_layer_name()
+        self._output_layer = QgsVectorLayer('Point?crs=epsg:4326', self._output_layer_name, 'memory')
+        self._provider = self._output_layer.dataProvider()
+        self._output_layer.startEditing()
+        self._provider.addAttributes([
+            QgsField("POINT_ID", QVariant.String, len=100),
+            QgsField("LON", QVariant.String, len=100),
+            QgsField("LAT", QVariant.String, len=100),
+            QgsField("POINT_DEF", QVariant.String, len=100),
+        ])
+        self._output_layer.commitChanges()
+        self._feature = QgsFeature(self._output_layer.fields())
+        QgsProject.instance().addMapLayer(self._output_layer)
+
+    # Point(s) calculation
+
+    def calculate(self):
+        """ Calculate longitude, latitude based on input data. """
+        if self.is_output_layer_removed():
+            self.create_output_layer()
+
     def run(self):
         """Run method that performs all the real work"""
 
@@ -467,7 +467,6 @@ class AviationLonLatCalculator:
             self.dlg.comboBoxInputDataMode.currentIndexChanged.connect(self.switch_input_data_mode)
             self.dlg.pushButtonCalculate.clicked.connect(self.calculate)
             self.dlg.pushButtonCancel.clicked.connect(self.dlg.close)
-            self.create_output_layer()
             self.dlg.mQgsFileWidgetInputCSV.fileChanged.connect(self.reset_csv_fields_assignment)
             self.dlg.mQgsFileWidgetInputCSV.setFilter('*.csv')
             self.dlg.comboBoxPolarCSVFieldDistanceUOM.currentIndexChanged.connect(
