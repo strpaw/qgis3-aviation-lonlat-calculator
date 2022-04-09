@@ -40,15 +40,6 @@ from .aviation_gis_tools.point_calculation import PointCalculation
 from .aviation_gis_tools.angle import AT_LONGITUDE, AT_LATITUDE, Angle
 
 
-def update_layer(mth):
-    def wrapper(self):
-        result = mth(self)
-        self._output_layer.commitChanges()
-        self._output_layer.updateExtents()
-        return result
-    return wrapper
-
-
 class AviationLonLatCalculator:
     """QGIS Plugin Implementation."""
 
@@ -199,53 +190,6 @@ class AviationLonLatCalculator:
                 self.tr(u'&AviationLonLatCalculator'),
                 action)
             self.iface.removeToolBarIcon(action)
-
-    def set_initial_csv_azimuth_distance_fields_assignment(self):
-        self.dlg.comboBoxPolarCSVFieldCalculatedPointID.clear()
-        self.dlg.comboBoxPolarCSVFieldDistanceValue.clear()
-        self.dlg.comboBoxPolarCSVFieldDistanceUOM.clear()
-        self.dlg.comboBoxPolarCSVFieldDistanceUOM.addItem('[user UOM]')
-        self.dlg.comboBoxPolarCSVUserDistanceUOM.setEnabled(True)
-        self.dlg.comboBoxPolarCSVUserDistanceUOM.setCurrentIndex(0)
-        self.dlg.comboBoxPolarCSVFieldAzimuth.clear()
-
-    def _init_point_calculation(self):
-        self._point_calculation = PointCalculation(ref_id=self.dlg.lineEditReferenceID.text(),
-                                                   ref_lon=self.dlg.lineEditReferenceLongitude.text(),
-                                                   ref_lat=self.dlg.lineEditReferenceLatitude.text())
-
-    @update_layer
-    def _convert_csv_azimuth_distance(self):
-        self._init_point_calculation()
-        if self._point_calculation.ref_err:
-            QMessageBox.critical(QWidget(), "Message", f"Reference point error!\n{self._point_calculation.ref_err}")
-        else:
-
-            if self.dlg.comboBoxPolarCSVFieldDistanceUOM.currentIndex() == 0:  # UOM by user, not from input file
-                dist_uom = self.dlg.csvUserDistanceUOM.currentText()
-            else:
-                dist_uom = self.dlg.comboBoxPolarCSVFieldDistanceUOM.currentText()
-
-            point_name_field = self.dlg.comboBoxPolarCSVFieldCalculatedPointID.currentText()
-            dist_field = self.dlg.fieldAzmDistDistanceValue.currentText()
-            azm_field = self.dlg.fieldAzmDistAzimuth.currentText()
-
-            with open(self.dlg.mQgsFileWidgetInputCSV.filePath()) as f:
-                reader = DictReader(f, delimiter=';')
-                for row in reader:
-                    d = Distance(row[dist_field], row[dist_uom])
-                    a = Bearing(row[azm_field])
-                    calc_position = self._point_calculation.point_by_polar_coordinates(distance=d, azimuth=a)
-                    if calc_position:
-                        lon_dd, lat_dd = calc_position
-
-                        self._feature['CALC_POINT'] = row[point_name_field]
-                        self._feature['CALC_LON'] = Angle.convert_dd_to_dms(lon_dd, AT_LONGITUDE)
-                        self._feature['CALC_LAT'] = Angle.convert_dd_to_dms(lon_dd, AT_LATITUDE)
-                        self._feature["INPUT_DATA"] = self._point_calculation.info_by_polar_coordinates(distance=d, azimuth=a)
-                        self._feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(lon_dd, lat_dd)))
-
-                        self._provider.addFeatures([self._feature])
 
     def _clear_reference_point(self):
         """ Clear content of Reference point data. """
@@ -404,8 +348,6 @@ class AviationLonLatCalculator:
 
     def reset_csv_fields_assignment(self):
         """ Reset CSV fields assignment for CSV mode calculations in case input CSV file has been changed. """
-        self.set_initial_csv_azimuth_distance_fields_assignment()
-
         fields = self.get_csv_fields()
         if fields:
             if self.dlg.stackedWidgetInputData.currentIndex() == 3:
