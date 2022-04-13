@@ -34,10 +34,6 @@ import os.path
 from datetime import datetime
 from functools import partial
 from csv import DictReader
-from .aviation_gis_tools.distance import Distance
-from .aviation_gis_tools.bearing import Bearing
-from .aviation_gis_tools.point_calculation import PointCalculation
-from .aviation_gis_tools.angle import AT_LONGITUDE, AT_LATITUDE, Angle
 
 
 class AviationLonLatCalculator:
