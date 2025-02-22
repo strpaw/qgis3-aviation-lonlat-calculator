@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>810</width>
-    <height>663</height>
+    <width>806</width>
+    <height>654</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1379,7 +1379,7 @@
   </widget>
   <widget class="QgsFileWidget" name="mQgsFileWidgetInputCSV">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -1392,7 +1392,7 @@
   </widget>
   <widget class="QLabel" name="labelInputCSV">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>

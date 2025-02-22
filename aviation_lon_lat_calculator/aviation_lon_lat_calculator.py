@@ -262,8 +262,7 @@ class AviationLonLatCalculator:
         self.dlg.comboBoxInputDataMode.setCurrentIndex(0)
         self.dlg.stackedWidgetInputData.setCurrentIndex(0)
         self.dlg.mQgsFileWidgetInputCSV.lineEdit().clear()
-        self.dlg.labelInputCSV.setEnabled(False)
-        self.dlg.mQgsFileWidgetInputCSV.setEnabled(False)
+        self.disable_csv_input()
         self._clear_polar_point_input()
         self._clear_ado_point_input()
         self._clear_cartesian_point_input()
@@ -271,14 +270,22 @@ class AviationLonLatCalculator:
         self._clear_ado_csv_input()
         self._clear_cartesian_csv_input()
 
+    def enable_csv_input(self) -> None:
+        """Enable possibility to select CSV data file"""
+        self.dlg.labelInputCSV.setVisible(True)
+        self.dlg.mQgsFileWidgetInputCSV.setVisible(True)
+
+    def disable_csv_input(self) -> None:
+        """Disable possibility to select CSV data file"""
+        self.dlg.labelInputCSV.setVisible(False)
+        self.dlg.mQgsFileWidgetInputCSV.setVisible(False)
+
     def _set_input_csv_field_mode(self):
         """ Enable/disable GUI element to select input CSV file if input data mode is one of related to CSVs. """
         if 3 <= self.dlg.comboBoxInputDataMode.currentIndex() <= 5:
-            self.dlg.labelInputCSV.setEnabled(True)
-            self.dlg.mQgsFileWidgetInputCSV.setEnabled(True)
+            self.enable_csv_input()
         else:
-            self.dlg.labelInputCSV.setEnabled(False)
-            self.dlg.mQgsFileWidgetInputCSV.setEnabled(False)
+            self.disable_csv_input()
 
     def switch_input_data_mode(self):
         """ Switch input data mode between different input: single point/CSV data, azimuth and distance etc.
