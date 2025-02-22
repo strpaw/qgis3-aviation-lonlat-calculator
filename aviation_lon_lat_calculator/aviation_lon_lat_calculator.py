@@ -35,6 +35,8 @@ from datetime import datetime
 from functools import partial
 from csv import DictReader
 
+from .result_layer import ResultLayer
+
 
 class AviationLonLatCalculator:
     """QGIS Plugin Implementation."""
@@ -47,10 +49,7 @@ class AviationLonLatCalculator:
             application at run time.
         :type iface: QgsInterface
         """
-        self._output_layer = None
-        self._output_layer_name = None
-        self._provider = None
-        self._feature = None
+        self.result_layer: ResultLayer = ResultLayer(iface=iface)
         self._point_calculation = None
         # Save reference to the QGIS interface
         self.iface = iface
@@ -357,41 +356,11 @@ class AviationLonLatCalculator:
                 self.dlg.comboBoxCartesianCSVFieldAxisYValue.clear()
                 self._assign_cartesian_csv_fields(fields)
 
-    # Output layer handling
-
-    def _set_output_layer_name(self):
-        """ Note: layer name is generated from timestamp. """
-        timestamp = datetime.now()
-        self._output_layer_name = "CalPoints_{}".format(timestamp.strftime("%Y_%m_%d_%H%M%f"))
-
-    def is_output_layer_removed(self):
-        """ Check if output layer has been removed from layers. """
-        return not QgsProject.instance().mapLayersByName(self._output_layer_name)
-
-    def create_output_layer(self):
-        """ Create point layer to store calculated points.
-        return: QgsVectorLayer
-        """
-        self._set_output_layer_name()
-        self._output_layer = QgsVectorLayer('Point?crs=epsg:4326', self._output_layer_name, 'memory')
-        self._provider = self._output_layer.dataProvider()
-        self._output_layer.startEditing()
-        self._provider.addAttributes([
-            QgsField("POINT_ID", QVariant.String, len=100),
-            QgsField("LON", QVariant.String, len=100),
-            QgsField("LAT", QVariant.String, len=100),
-            QgsField("POINT_DEF", QVariant.String, len=100),
-        ])
-        self._output_layer.commitChanges()
-        self._feature = QgsFeature(self._output_layer.fields())
-        QgsProject.instance().addMapLayer(self._output_layer)
-
     # Point(s) calculation
 
     def calculate(self):
         """ Calculate longitude, latitude based on input data. """
-        if self.is_output_layer_removed():
-            self.create_output_layer()
+        self.result_layer.setup()
 
     def run(self):
         """Run method that performs all the real work"""
