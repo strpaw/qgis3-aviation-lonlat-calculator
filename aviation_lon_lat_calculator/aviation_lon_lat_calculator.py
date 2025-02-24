@@ -21,19 +21,20 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, QVariant
+from csv import DictReader
+from functools import partial
+import os.path
+
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction, QWidget, QMessageBox
-from qgis.core import *
+from qgis.PyQt.QtWidgets import QAction
+# from qgis.core import *
 
 # Initialize Qt resources from file resources.py
-from .resources import *
+from .resources import *  # pylint: disable=unused-wildcard-import, wildcard-import
 # Import the code for the dialog
 from .aviation_lon_lat_calculator_dialog import AviationLonLatCalculatorDialog
-import os.path
-from datetime import datetime
-from functools import partial
-from csv import DictReader
+from .result_layer import ResultLayer
 
 
 class AviationLonLatCalculator:
@@ -47,10 +48,7 @@ class AviationLonLatCalculator:
             application at run time.
         :type iface: QgsInterface
         """
-        self._output_layer = None
-        self._output_layer_name = None
-        self._provider = None
-        self._feature = None
+        self.result_layer: ResultLayer = ResultLayer(iface=iface)
         self._point_calculation = None
         # Save reference to the QGIS interface
         self.iface = iface
@@ -61,7 +59,7 @@ class AviationLonLatCalculator:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'AviationLonLatCalculator_{}.qm'.format(locale))
+            f'AviationLonLatCalculator_{locale}.qm')
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -70,7 +68,7 @@ class AviationLonLatCalculator:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&AviationLonLatCalculator')
+        self.menu = self.tr('&AviationLonLatCalculator')
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
@@ -91,7 +89,6 @@ class AviationLonLatCalculator:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('AviationLonLatCalculator', message)
 
-
     def add_action(
         self,
         icon_path,
@@ -102,7 +99,8 @@ class AviationLonLatCalculator:
         add_to_toolbar=True,
         status_tip=None,
         whats_this=None,
-        parent=None):
+        parent=None
+    ):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -166,13 +164,13 @@ class AviationLonLatCalculator:
 
         return action
 
-    def initGui(self):
+    def initGui(self):  # pylint: disable=invalid-name
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         icon_path = ':/plugins/aviation_lon_lat_calculator/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'AviationLonLatCalculator'),
+            text=self.tr('AviationLonLatCalculator'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
@@ -183,7 +181,7 @@ class AviationLonLatCalculator:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(
-                self.tr(u'&AviationLonLatCalculator'),
+                self.tr('&AviationLonLatCalculator'),
                 action)
             self.iface.removeToolBarIcon(action)
 
@@ -263,8 +261,7 @@ class AviationLonLatCalculator:
         self.dlg.comboBoxInputDataMode.setCurrentIndex(0)
         self.dlg.stackedWidgetInputData.setCurrentIndex(0)
         self.dlg.mQgsFileWidgetInputCSV.lineEdit().clear()
-        self.dlg.labelInputCSV.setEnabled(False)
-        self.dlg.mQgsFileWidgetInputCSV.setEnabled(False)
+        self.disable_csv_input()
         self._clear_polar_point_input()
         self._clear_ado_point_input()
         self._clear_cartesian_point_input()
@@ -272,14 +269,22 @@ class AviationLonLatCalculator:
         self._clear_ado_csv_input()
         self._clear_cartesian_csv_input()
 
+    def enable_csv_input(self) -> None:
+        """Enable possibility to select CSV data file"""
+        self.dlg.labelInputCSV.setVisible(True)
+        self.dlg.mQgsFileWidgetInputCSV.setVisible(True)
+
+    def disable_csv_input(self) -> None:
+        """Disable possibility to select CSV data file"""
+        self.dlg.labelInputCSV.setVisible(False)
+        self.dlg.mQgsFileWidgetInputCSV.setVisible(False)
+
     def _set_input_csv_field_mode(self):
         """ Enable/disable GUI element to select input CSV file if input data mode is one of related to CSVs. """
         if 3 <= self.dlg.comboBoxInputDataMode.currentIndex() <= 5:
-            self.dlg.labelInputCSV.setEnabled(True)
-            self.dlg.mQgsFileWidgetInputCSV.setEnabled(True)
+            self.enable_csv_input()
         else:
-            self.dlg.labelInputCSV.setEnabled(False)
-            self.dlg.mQgsFileWidgetInputCSV.setEnabled(False)
+            self.disable_csv_input()
 
     def switch_input_data_mode(self):
         """ Switch input data mode between different input: single point/CSV data, azimuth and distance etc.
@@ -302,11 +307,15 @@ class AviationLonLatCalculator:
             field_widget (): QComboBox, distance UOM from CSV field
             user_widget (): QComboBox,  distance UOM from user related to distance UOM from CSV field
         """
-        user_widget.setEnabled(True) if field_widget.currentIndex() == 0 else user_widget.setEnabled(False)
+        if field_widget.currentIndex() == 0:
+            user_widget.setEnabled(True)
+        else:
+            user_widget.setEnabled(False)
 
     def get_csv_fields(self):
+        """Return fields from CSV data file"""
         if os.path.isfile(self.dlg.mQgsFileWidgetInputCSV.filePath()):
-            with open(self.dlg.mQgsFileWidgetInputCSV.filePath(), 'r') as f:
+            with open(self.dlg.mQgsFileWidgetInputCSV.filePath(), 'r', encoding="utf-8") as f:
                 reader = DictReader(f, delimiter=';')
                 return reader.fieldnames
 
@@ -357,48 +366,18 @@ class AviationLonLatCalculator:
                 self.dlg.comboBoxCartesianCSVFieldAxisYValue.clear()
                 self._assign_cartesian_csv_fields(fields)
 
-    # Output layer handling
-
-    def _set_output_layer_name(self):
-        """ Note: layer name is generated from timestamp. """
-        timestamp = datetime.now()
-        self._output_layer_name = "CalPoints_{}".format(timestamp.strftime("%Y_%m_%d_%H%M%f"))
-
-    def is_output_layer_removed(self):
-        """ Check if output layer has been removed from layers. """
-        return not QgsProject.instance().mapLayersByName(self._output_layer_name)
-
-    def create_output_layer(self):
-        """ Create point layer to store calculated points.
-        return: QgsVectorLayer
-        """
-        self._set_output_layer_name()
-        self._output_layer = QgsVectorLayer('Point?crs=epsg:4326', self._output_layer_name, 'memory')
-        self._provider = self._output_layer.dataProvider()
-        self._output_layer.startEditing()
-        self._provider.addAttributes([
-            QgsField("POINT_ID", QVariant.String, len=100),
-            QgsField("LON", QVariant.String, len=100),
-            QgsField("LAT", QVariant.String, len=100),
-            QgsField("POINT_DEF", QVariant.String, len=100),
-        ])
-        self._output_layer.commitChanges()
-        self._feature = QgsFeature(self._output_layer.fields())
-        QgsProject.instance().addMapLayer(self._output_layer)
-
     # Point(s) calculation
 
     def calculate(self):
         """ Calculate longitude, latitude based on input data. """
-        if self.is_output_layer_removed():
-            self.create_output_layer()
+        self.result_layer.setup()
 
     def run(self):
         """Run method that performs all the real work"""
 
         # Create the dialog with elements (after translation) and keep reference
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-        if self.first_start == True:
+        if self.first_start:
             self.first_start = False
             self.dlg = AviationLonLatCalculatorDialog()
             self.set_gui_default()
